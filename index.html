@@ -157,7 +157,25 @@ section.view.on{display:block}
 .extra .thumb{flex-basis:52px;height:52px}
 .hr{height:1px;background:var(--line);margin:12px 0}
 .empty{text-align:center;color:var(--mute);padding:30px 10px}
-@media print{nav.tabs,header.top .iconbtn,.btn,.more{display:none!important}body{padding:0}}
+#printSheet{display:none}
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  body{padding:0;background:#fff!important;color:#222!important}
+  body>*:not(#printSheet){display:none!important}
+  #printSheet{display:block;font-size:9.5px;line-height:1.3}
+  #printSheet h1{font-size:20px;margin:0 0 2px}
+  #printSheet .sub{color:#666;margin:0 0 8px;font-size:11px}
+  #printSheet table{width:100%;border-collapse:collapse;table-layout:fixed}
+  #printSheet th{background:#F6E6E5;color:#7a3a3f;padding:5px;border:1px solid #d9c9c0;font-size:12px}
+  #printSheet td{border:1px solid #d9c9c0;padding:4px;vertical-align:top}
+  #printSheet td.lbl{width:70px;font-weight:700;background:#FBF8F4}
+  #printSheet .tag{display:inline-block;padding:1px 6px;border-radius:8px;font-weight:700;margin-bottom:3px}
+  #printSheet ol{margin:0;padding-left:15px}
+  #printSheet li{margin-bottom:1px}
+  #printSheet .box{display:inline-block;width:9px;height:9px;border:1px solid #888;margin-right:3px;vertical-align:-1px}
+  #printSheet .foot{margin-top:8px;font-size:10px;color:#444}
+  #printSheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
@@ -199,6 +217,11 @@ section.view.on{display:block}
     <p class="small muted" style="margin:0">Use this if your skin is new to retinol or feels dry, red or stingy. Extra retinol nights become recovery nights.</p>
   </div>
   <div class="card">
+    <h3 style="font-size:18px">NIVEA shower mornings</h3>
+    <p class="muted small" style="margin:4px 0 10px">Tap the mornings you use NIVEA Clear Up in the shower. The other mornings use Garnier. NIVEA is not used at night, so it never meets copper peptides.</p>
+    <div class="feel" id="niveaDays"></div>
+  </div>
+  <div class="card">
     <h3 style="font-size:18px;margin-bottom:10px">What each night means</h3>
     <div class="legend" id="legend"></div>
   </div>
@@ -213,7 +236,7 @@ section.view.on{display:block}
     <h3 style="font-size:18px">Weekly extras</h3>
     <div id="weekExtras"></div>
   </div>
-  <button class="btn ghost full" onclick="window.print()">🖨️ Print this week</button>
+  <button class="btn ghost full" id="printBtn">🖨️ Print my week (every step, every day)</button>
 </section>
 
 <!-- SHELF -->
@@ -250,6 +273,7 @@ section.view.on{display:block}
   <button data-v="guide"><span class="ic">📖</span>Guide</button>
 </nav>
 
+<div id="printSheet"></div>
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
 <input type="file" id="fileIn" accept="image/*" hidden>
@@ -260,7 +284,7 @@ const IMG = {"acnepatch": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2w
 const KEY='glowRitual.v1';
 const NIGHTS={
   retinol:{name:'Retinol night',ic:'🌹',cls:'n-retinol',what:'Re\'equil 0.1% Retinol Night Cream. Smooths, firms and renews skin. Pea-sized amount on dry skin.'},
-  azelaic:{name:'Azelaic night',ic:'🌼',cls:'n-azelaic',what:'Isispharma Metroruboril A.Z (15% azelaic acid). Calms redness, evens tone and texture. NIVEA Clear Up cleanser is used on these nights.'},
+  azelaic:{name:'Azelaic night',ic:'🌼',cls:'n-azelaic',what:'Isispharma Metroruboril A.Z (15% azelaic acid). Calms redness, evens tone and texture.'},
   copper:{name:'Copper night',ic:'💧',cls:'n-copper',what:'The Ordinary Multi-Peptide + Copper Peptides 1%. Firmness and fine lines. Never on the same night as retinol, azelaic or salicylic acid.'},
   recovery:{name:'Recovery night',ic:'🌿',cls:'n-recovery',what:'No treatment. Just cleanse, hydrate and seal so your skin barrier can rest.'}
 };
@@ -275,10 +299,10 @@ const DEFAULT_PRODUCTS=[
   desc:'A no-rinse cleansing water. Tiny "micelles" lift makeup, sunscreen and dirt like a magnet, without rubbing or stripping. Made for sensitive skin, safe on face, eyes and lips.',
   ingr:['Micellar water','No perfume','0% alcohol'],how:'Soak a cotton pad and hold it on the skin for a few seconds, then wipe gently. In the evening, use it as your first cleanse to remove sunscreen and makeup.',amount:'1 to 2 soaked cotton pads',
   avoid:'Nothing to avoid.',look:'A micellar water labelled for sensitive skin, fragrance-free and alcohol-free.',size:'',pao:null},
- {id:'nivea',brand:'NIVEA',name:'Clear Up Deep Pore Cleanser',cat:'Cleanser',use:'Evening',photo:'def:nivea',
+ {id:'nivea',brand:'NIVEA',name:'Clear Up Deep Pore Cleanser',cat:'Cleanser',use:'Morning',photo:'def:nivea',
   desc:'A deep-cleaning face wash for acne-prone skin. Salicylic acid (BHA) gets inside pores to clear oil and dead skin, niacinamide helps calm and even the skin.',
-  ingr:['Salicylic acid (BHA)','Sea salt','Niacinamide'],how:'Wet your face with lukewarm water, massage a small amount for about 30 seconds, rinse well, pat dry. In your plan it is used only on azelaic nights.',amount:'A hazelnut-sized amount',
-  avoid:'Do not use on copper peptide nights (The Ordinary says no salicylic acid with copper peptides). Not on retinol nights, to avoid drying your skin.',look:'A face wash with salicylic acid (BHA) for acne-prone skin. Niacinamide is a bonus. Avoid harsh scrubs.',size:'',pao:null},
+  ingr:['Salicylic acid (BHA)','Sea salt','Niacinamide'],how:'In the shower on the mornings you choose: wet your face with lukewarm water, massage a small amount for about 30 seconds, rinse well, pat dry. Pick your NIVEA mornings in Week.',amount:'A hazelnut-sized amount',
+  avoid:'Once a day at most. Keep it in the morning so it never meets copper peptides (The Ordinary says no salicylic acid with copper peptides). If your skin feels dry or tight, choose fewer NIVEA mornings.',look:'A face wash with salicylic acid (BHA) for acne-prone skin. Niacinamide is a bonus. Avoid harsh scrubs.',size:'',pao:null},
  {id:'jiyu',brand:'JiYu',name:'Toning Polish / Renewal Toner Pads',cat:'Toner pads',use:'Morning',photo:'def:jiyu',
   desc:'Pre-soaked Korean toner pads. They hydrate, gently polish away dull skin and help fade dark spots and acne marks. Can also be left on the cheeks as a mini sheet mask.',
   ingr:['Niacinamide','Snail mucin','Centella asiatica','Madecassoside','Alpha-arbutin','Peptides','3-O-ethyl ascorbic acid (vitamin C derivative)','Licorice root','Maltobionic acid'],
@@ -359,7 +383,8 @@ const DEFAULT_PRODUCTS=[
 
 const DEFAULT_STEPS={
  am:[
-  {id:'a1',label:'Cleanse',pid:'garnier',tip:'Lukewarm water, or micellar water on a cotton pad. No NIVEA in the morning.',when:'all'},
+  {id:'a1n',label:'Cleanse in the shower',pid:'nivea',tip:'Lukewarm water, massage 30 seconds, rinse, pat dry.',when:[1,3,5]},
+  {id:'a1',label:'Cleanse',pid:'garnier',tip:'Lukewarm water, or micellar water on a cotton pad.',when:[0,2,4,6]},
   {id:'a2',label:'Tone & brighten',pid:'jiyu',tip:'Swipe 1 pad. Skin looks dull? Leave it on the cheeks 10 to 15 min as a mini mask.',when:'all'},
   {id:'a3',label:'Hydrate',pid:'tohya',tip:'2 to 3 drops on slightly damp skin. Press in.',when:'all'},
   {id:'a4',label:'Moisturise',pid:'medicube',tip:'Or Embryolisse on makeup days.',when:'all'},
@@ -367,8 +392,7 @@ const DEFAULT_STEPS={
  ],
  pm:[
   {id:'p1',label:'First cleanse',pid:'garnier',tip:'Removes sunscreen, makeup and dust.',when:'all'},
-  {id:'p2',label:'Second cleanse',pid:'nivea',tip:'Lukewarm water, massage 30 seconds, rinse, pat dry.',when:['azelaic']},
-  {id:'p3',label:'Second cleanse',pid:'garnier',tip:'A second clean pad until it comes away clean (or a gentle fragrance-free wash if you buy one).',when:['retinol','copper','recovery']},
+  {id:'p3',label:'Second cleanse',pid:'garnier',tip:'A second clean pad until it comes away clean (or a gentle fragrance-free wash if you buy one).',when:'all'},
   {id:'p4',label:'Hydrate',pid:'tohya',tip:'2 to 3 drops on damp skin.',when:'all'},
   {id:'p5',label:'Treatment: Retinol',pid:'reequil',tip:'Wait until skin is DRY. Pea-sized amount, avoid eye, nose and mouth corners.',when:['retinol']},
   {id:'p6',label:'Treatment: Azelaic acid',pid:'metro',tip:'Thin layer over the whole face.',when:['azelaic']},
@@ -383,10 +407,16 @@ const DEFAULT_STEPS={
 };
 const DEFAULT_NIGHTS={0:'retinol',1:'copper',2:'azelaic',3:'retinol',4:'azelaic',5:'retinol',6:'copper'};
 
-function fresh(){return {v:1,theme:'light',starter:false,nights:{...DEFAULT_NIGHTS},products:JSON.parse(JSON.stringify(DEFAULT_PRODUCTS)).map(p=>({...p,opened:'',low:false,notes:'',history:[]})),steps:JSON.parse(JSON.stringify(DEFAULT_STEPS)),log:{},diary:{},maskLog:[],patchLog:[]}}
+function fresh(){return {v:2,theme:'light',starter:false,nights:{...DEFAULT_NIGHTS},products:JSON.parse(JSON.stringify(DEFAULT_PRODUCTS)).map(p=>({...p,opened:'',low:false,notes:'',history:[]})),steps:JSON.parse(JSON.stringify(DEFAULT_STEPS)),log:{},diary:{},maskLog:[],patchLog:[]}}
 let S;
 function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):fresh()}catch(e){S=fresh()}
-  if(!S.steps.body)S.steps.body=JSON.parse(JSON.stringify(DEFAULT_STEPS.body));}
+  if(!S.steps.body)S.steps.body=JSON.parse(JSON.stringify(DEFAULT_STEPS.body));
+  if(!S.v||S.v<2){ // NIVEA moves to chosen mornings
+    S.steps.pm=S.steps.pm.filter(s=>s.id!=='p2');const p3=S.steps.pm.find(s=>s.id==='p3');if(p3)p3.when='all';
+    const a1=S.steps.am.find(s=>s.id==='a1');if(a1){a1.tip='Lukewarm water, or micellar water on a cotton pad.';a1.when=[0,2,4,6]}
+    if(!S.steps.am.find(s=>s.id==='a1n'))S.steps.am.unshift({id:'a1n',label:'Cleanse in the shower',pid:'nivea',tip:'Lukewarm water, massage 30 seconds, rinse, pat dry.',when:[1,3,5]});
+    const n=S.products.find(p=>p.id==='nivea'),d=DEFAULT_PRODUCTS.find(p=>p.id==='nivea');if(n&&(!n.history||!n.history.length)){n.use=d.use;n.how=d.how;n.avoid=d.avoid}
+    S.v=2;save()}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Could not save. Phone storage may be full. Try smaller photos or Backup.')}}
 
 /* helpers */
@@ -405,7 +435,8 @@ function nightFor(date){
 }
 function stepsFor(period,date){
   const n=nightFor(date||new Date());
-  return (S.steps[period]||[]).filter(s=>s.when==='all'||(Array.isArray(s.when)&&s.when.includes(n)));
+  const dw=(date||new Date()).getDay();
+  return (S.steps[period]||[]).filter(s=>s.when==='all'||(Array.isArray(s.when)&&(period==='pm'?s.when.includes(n):s.when.includes(dw))));
 }
 function dayLog(k){if(!S.log[k])S.log[k]={am:{},pm:{},body:{}};return S.log[k]}
 function periodDone(k,period){const d=new Date(k+'T12:00:00');const st=stepsFor(period,d);const l=(S.log[k]||{})[period]||{};return st.length>0&&st.every(s=>l[s.id])}
@@ -470,11 +501,13 @@ function renderWeek(){
   $('#wkTable').innerHTML=DAYS.map((d,i)=>{const eff=nightFor(addDays(new Date(),i-today));const n=S.nights[i];
     return `<tr class="${i===today?'today':''}"><td>${d}</td><td><select data-night="${i}">${Object.keys(NIGHTS).map(x=>`<option value="${x}" ${x===n?'selected':''}>${NIGHTS[x].ic} ${NIGHTS[x].name}</option>`).join('')}</select>${eff!==n?`<div class="small" style="color:var(--sage);margin-top:4px">Starter mode: ${NIGHTS[eff].name}</div>`:''}</td></tr>`}).join('');
   $('#starter').checked=!!S.starter;
+  const an=S.steps.am.find(s=>s.id==='a1n');
+  $('#niveaDays').innerHTML=an?DAYS.map((d,i)=>`<button data-nday="${i}" class="${Array.isArray(an.when)&&an.when.includes(i)||an.when==='all'?'on':''}">${d}</button>`).join(''):'<span class="small muted">The NIVEA morning step was deleted. Add it again in My routine steps.</span>';
   $('#legend').innerHTML=Object.entries(NIGHTS).map(([k,n])=>`<div class="li"><span class="badge ${n.cls} ls">${n.ic}</span><div><b>${n.name}</b><div class="small muted">${esc(n.what)}</div></div></div>`).join('');
   const ret=[0,1,2,3,4,5,6].filter(i=>S.nights[i]==='retinol'&&(S.nights[(i+1)%7]==='retinol'));
   document.querySelectorAll('#segEdit button').forEach(b=>b.classList.toggle('on',b.dataset.p===editPeriod));
   const list=S.steps[editPeriod];
-  $('#stepEditList').innerHTML=list.map((s,i)=>{const p=prod(s.pid);const w=s.when==='all'?(editPeriod==='pm'?'Every night':'Every day'):s.when.map(x=>NIGHTS[x].name).join(', ');
+  $('#stepEditList').innerHTML=list.map((s,i)=>{const p=prod(s.pid);const w=s.when==='all'?(editPeriod==='pm'?'Every night':'Every day'):editPeriod==='pm'?s.when.map(x=>NIGHTS[x].name).join(', '):(s.when.length?s.when.map(x=>DAYS[x]).join(', '):'No days chosen');
     return `<div class="stepedit"><div class="t"><b>${i+1}. ${esc(s.label)}</b><span>${p?esc(p.brand+' '+p.name):'No product'} · ${esc(w)}</span></div>
     <button class="mini" data-mv="${i}" data-d="-1" aria-label="Move up">↑</button><button class="mini" data-mv="${i}" data-d="1" aria-label="Move down">↓</button><button class="mini" data-es="${s.id}" aria-label="Edit">✏️</button></div>`}).join('')||'<div class="empty">No steps yet.</div>';
   const last=S.maskLog[S.maskLog.length-1];
@@ -627,14 +660,15 @@ function confirmSheet(msg,yes,label){openSheet(`<h2>Are you sure?</h2><p>${msg}<
 function stepForm(sid){
   const isNew=!sid;const list=S.steps[editPeriod];const s=isNew?{label:'',pid:'',tip:'',when:'all'}:list.find(x=>x.id===sid);
   const whenOpts=editPeriod==='pm'?`<label>Which nights</label><div>${['all',...Object.keys(NIGHTS)].map(k=>`<div class="ckline"><input type="checkbox" name="w" value="${k}" id="w_${k}" ${(k==='all'&&s.when==='all')||(Array.isArray(s.when)&&s.when.includes(k))?'checked':''}><label for="w_${k}" style="margin:0;color:var(--ink)">${k==='all'?'Every night':NIGHTS[k].ic+' '+NIGHTS[k].name}</label></div>`).join('')}</div>`:'';
+  const dayOpts=editPeriod!=='pm'?`<label>Which days</label><div>${['all',0,1,2,3,4,5,6].map(k=>`<div class="ckline"><input type="checkbox" name="w" value="${k}" id="w_${k}" ${(k==='all'&&s.when==='all')||(Array.isArray(s.when)&&s.when.includes(k))?'checked':''}><label for="w_${k}" style="margin:0;color:var(--ink)">${k==='all'?'Every day':DAYS_L[k]}</label></div>`).join('')}</div>`:'';
   openSheet(`<h2>${isNew?'Add a step':'Edit step'}</h2><form id="sform">
    <label>Step name</label><input name="label" value="${esc(s.label)}" required placeholder="e.g. Eye cream">
    <label>Product</label><select name="pid"><option value="">Choose a product</option>${S.products.map(p=>`<option value="${p.id}" ${p.id===s.pid?'selected':''}>${esc(p.brand+' '+p.name)}</option>`).join('')}</select>
    <label>Tip for this step</label><textarea name="tip">${esc(s.tip)}</textarea>
-   ${whenOpts}
+   ${whenOpts}${dayOpts}
    <div class="btnrow"><button class="btn" type="submit">Save</button>${isNew?'':'<button class="btn red" type="button" id="delStep">Delete step</button>'}<button class="btn ghost" type="button" data-close>Cancel</button></div></form>`);
   $('#sform').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);let w='all';
-    if(editPeriod==='pm'){const ws=f.getAll('w');w=ws.includes('all')||!ws.length?'all':ws}
+    const ws=f.getAll('w');if(editPeriod==='pm'){w=ws.includes('all')||!ws.length?'all':ws}else{w=ws.includes('all')||!ws.length?'all':ws.map(Number)}
     const o={label:f.get('label').trim(),pid:f.get('pid'),tip:f.get('tip').trim(),when:w};
     if(isNew){o.id=editPeriod[0]+Date.now();list.push(o)}else Object.assign(s,o);
     save();closeSheet();refresh();toast('Step saved')};
@@ -654,6 +688,24 @@ function settings(){
 }
 $('#importIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o.products||!o.steps)throw 0;S=o;save();applyTheme();closeSheet();refresh();toast('Backup restored')}catch(x){toast('That file is not a Glow Ritual backup')}};r.readAsText(f)};
 
+function buildPrint(){
+  const today=new Date(),start=addDays(today,-today.getDay());
+  const tagC={retinol:'#F6E6E5;color:#B5656B',azelaic:'#F6EEDF;color:#B98A45',copper:'#E4ECF5;color:#5A7FA6',recovery:'#E5EEE7;color:#5F7F68'};
+  const li=s=>{const p=prod(s.pid);return `<li><span class="box"></span><b>${esc(s.label)}:</b> ${p?esc(p.brand+' '+p.name.split('(')[0].trim()):'(no product)'}</li>`};
+  let am='',pm='',bd='';
+  for(let i=0;i<7;i++){const d=addDays(start,i),n=nightFor(d);
+    am+=`<td><ol>${stepsFor('am',d).map(li).join('')}</ol></td>`;
+    pm+=`<td><span class="tag" style="background:${tagC[n]}">${NIGHTS[n].ic} ${NIGHTS[n].name}</span><ol>${stepsFor('pm',d).map(li).join('')}</ol></td>`;
+    bd+=`<td><ol>${stepsFor('body',d).map(li).join('')}</ol></td>`}
+  $('#printSheet').innerHTML=`<h1>Glow Ritual - my week</h1><p class="sub">Week of ${start.toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})}${S.starter?' · Retinol starter mode on':''}</p>
+  <table><tr><th style="width:70px"></th>${DAYS_L.map(x=>`<th>${x}</th>`).join('')}</tr>
+  <tr><td class="lbl">☀️ Morning</td>${am}</tr><tr><td class="lbl">🌙 Evening</td>${pm}</tr><tr><td class="lbl">🤲 Body</td>${bd}</tr></table>
+  <div class="foot"><b>Extras:</b> Charcoal mask every 1 to 2 weeks on a copper or recovery night (10 min, T-zone) · JiYu pad as a 10 to 15 min cheek mask on dull mornings · Spot patches overnight when needed.<br>
+  <b>Amounts:</b> Hyaluronic and copper serums 2 to 3 drops · Retinol 1 pea-sized amount on dry skin · Azelaic a thin layer · NIVEA a hazelnut-sized amount · Sunscreen at least 1 teaspoon (5 ml / 0.17 fl oz).<br>
+  <b>Rules:</b> Sunscreen every morning, at least 1 teaspoon (5 ml / 0.17 fl oz), reapply about every 2 hours outdoors · Retinol on dry skin, pea-sized · One treatment per night · Copper peptides never with retinol, azelaic or salicylic acid.</div>`;
+}
+window.addEventListener('beforeprint',buildPrint);
+$('#printBtn').onclick=()=>{buildPrint();window.print()};
 function applyTheme(){document.body.classList.toggle('dark',S.theme==='dark');$('#themeBtn').textContent=S.theme==='dark'?'☀️':'🌙';
   document.querySelector('meta[name=theme-color]').content=S.theme==='dark'?'#1C1A19':'#FBF8F4'}
 function refresh(){const v=document.querySelector('section.view.on').id.slice(2);render(v);if(v!=='today')renderToday()}
@@ -678,6 +730,8 @@ document.addEventListener('click',e=>{
   if(d.deld){confirmSheet('Delete this diary entry?',()=>{delete S.diary[d.deld];save();closeSheet();renderDiary()});return}
   if(d.mv!==undefined){const i=+d.mv,j=i+(+d.d),L=S.steps[editPeriod];if(j<0||j>=L.length)return;[L[i],L[j]]=[L[j],L[i]];save();refresh();return}
   if(d.es){stepForm(d.es);return}
+  if(d.nday!==undefined){const i=+d.nday,an=S.steps.am.find(s=>s.id==='a1n'),ga=S.steps.am.find(s=>s.id==='a1');let w=an.when==='all'?[0,1,2,3,4,5,6]:[...an.when];
+    w=w.includes(i)?w.filter(x=>x!==i):[...w,i].sort();an.when=w;if(ga)ga.when=[0,1,2,3,4,5,6].filter(x=>!w.includes(x));save();refresh();toast(DAYS_L[i]+(w.includes(i)?': NIVEA morning':': Garnier morning'));return}
   if(d.theme){S.theme=d.theme;save();applyTheme();return}
   if(t.id==='maskDone'){const k=dkey();if(!S.maskLog.includes(k))S.maskLog.push(k);save();renderToday();toast('Mask logged');return}
 });
