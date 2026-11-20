@@ -168,6 +168,13 @@ section.view.on{display:block}
 .bl b{min-width:44px;color:var(--plum)}
 .hyg{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}
 .hyg:last-child{border:0}
+.map svg{width:100%;max-width:340px;display:block;margin:6px auto;background:#FFFDFB;border:1px solid var(--line);border-radius:14px}
+.legend2{display:flex;flex-wrap:wrap;gap:8px 12px;font-size:13px;margin:6px 0}
+.legend2 i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px;border:1px solid rgba(0,0,0,.1)}
+.wherebtn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:3px 10px;font-size:12.5px;color:var(--plum)}
+.dodont{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dodont div{text-align:center;font-size:13px;font-weight:700}
+.dodont svg{max-width:160px}
 @media print{
   @page{size:A4 landscape;margin:8mm}
   body{padding:0;background:#fff!important;color:#222!important}
@@ -263,8 +270,9 @@ section.view.on{display:block}
     <p>Pick a look and follow the steps. Every step shows the product and the brush to use.</p>
   </div>
   <div class="seg" id="segLook">
+    <button data-look="mk0">🌿 Minimal</button>
     <button data-look="mk1">☀️ Everyday</button>
-    <button data-look="mk2">🌸 Soft glam</button>
+    <button data-look="mk2">🌸 Soft</button>
     <button data-look="mk3">✨ Evening</button>
   </div>
   <div class="filters" id="mkSub"></div>
@@ -409,7 +417,8 @@ const DEFAULT_PRODUCTS=[
 
 const MCATS=['Prep & primer','Face','Concealer','Powder','Cheeks','Eyes','Brows & lashes','Lips','Setting','Tools & brushes'];
 const MUSES=['Everyday','Soft glam','Evening','Touch-ups','All looks','Tools','Not in my looks'];
-const LOOKS={mk1:{name:'Everyday',ic:'☀️',time:'About 5 minutes',what:'Fresh, even skin, a bit of colour and neat brows. For any normal day.'},
+const LOOKS={mk0:{name:'Minimal lift',ic:'🌿',time:'About 3 minutes',what:'The least makeup for a fresh, lifted, healthy face. Your go-to on most days.'},
+  mk1:{name:'Everyday',ic:'☀️',time:'About 5 minutes',what:'Fresh, even skin, a bit of colour and neat brows. For any normal day.'},
   mk2:{name:'Soft glam',ic:'🌸',time:'About 15 minutes',what:'For lunches, outings and photos. Soft eyes, warm cheeks, defined lips.'},
   mk3:{name:'Evening',ic:'✨',time:'About 25 minutes',what:'For dinners and special events. More definition and long-lasting.'}};
 const MP=(o)=>Object.assign({kind:'makeup',size:'',pao:null,look:'',avoid:''},o);
@@ -506,6 +515,11 @@ const DEFAULT_MAKEUP=[
 ];
 const MS=(id,label,pid,brush,tip)=>({id,label,pid,brush,tip,when:'all'});
 const DEFAULT_LOOKS={
+ mk0:[MS('k0a','Skincare first','','','Your morning ritual up to the moisturiser. Wait 2 to 3 minutes so it sinks in.'),
+  MS('k0b','Tinted sunscreen','m_eucerin','Fingers','Replaces Cicaplast on makeup days. At least 1 teaspoon (5 ml / 0.17 fl oz). It evens your skin, so no foundation needed.'),
+  MS('k0c','Concealer, only where needed','m_eraser','Fingertip or RT 210 mini expert concealer','Tiny dots only where there is darkness or redness: inner corner under the eyes, beside the nose. Tap up and out.'),
+  MS('k0d','Cream blush, high','m_blush','Its own brush or fingertips','Just above the round of the cheek, blended up toward the temple. Tap the leftover on your lips.'),
+  MS('k0e','Brows up','m_lashbrow','The gel wand','Brush brows up and out. Instantly makes eyes look more open.')],
  mk1:[MS('k1a','Skincare first','','','Do your morning ritual up to the moisturiser. Wait 2 to 3 minutes so it sinks in.'),
   MS('k1b','Tinted sunscreen','m_eucerin','Fingers','Replaces Cicaplast on makeup days. At least 1 teaspoon (5 ml / 0.17 fl oz) for face and neck. It evens your tone, so you may not need foundation.'),
   MS('k1c','Concealer','m_eraser','RT 210 mini expert concealer, or tap with a fingertip','Small dots under the eyes at the inner corner, beside the nose and on dark spots. Tap, never rub.'),
@@ -573,7 +587,7 @@ const DEFAULT_STEPS={
 };
 const DEFAULT_NIGHTS={0:'retinol',1:'copper',2:'azelaic',3:'retinol',4:'azelaic',5:'retinol',6:'copper'};
 
-function fresh(){return {v:3,theme:'light',starter:false,nights:{...DEFAULT_NIGHTS},products:JSON.parse(JSON.stringify([...DEFAULT_PRODUCTS,...DEFAULT_MAKEUP])).map(p=>({...p,opened:'',low:false,notes:'',history:[]})),steps:{...JSON.parse(JSON.stringify(DEFAULT_STEPS)),...JSON.parse(JSON.stringify(DEFAULT_LOOKS))},log:{},diary:{},maskLog:[],patchLog:[],brushLog:[],spongeLog:[]}}
+function fresh(){return {v:4,theme:'light',starter:false,nights:{...DEFAULT_NIGHTS},products:JSON.parse(JSON.stringify([...DEFAULT_PRODUCTS,...DEFAULT_MAKEUP])).map(p=>({...p,opened:'',low:false,notes:'',history:[]})),steps:{...JSON.parse(JSON.stringify(DEFAULT_STEPS)),...JSON.parse(JSON.stringify(DEFAULT_LOOKS))},log:{},diary:{},maskLog:[],patchLog:[],brushLog:[],spongeLog:[]}}
 let S;
 function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):fresh()}catch(e){S=fresh()}
   if(!S.steps.body)S.steps.body=JSON.parse(JSON.stringify(DEFAULT_STEPS.body));
@@ -586,7 +600,8 @@ function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):fresh()}
   if(S.v<3){ // add Makeup
     DEFAULT_MAKEUP.forEach(m=>{if(!S.products.find(p=>p.id===m.id))S.products.push({...JSON.parse(JSON.stringify(m)),opened:'',low:false,notes:'',history:[]})});
     Object.keys(DEFAULT_LOOKS).forEach(k=>{if(!S.steps[k])S.steps[k]=JSON.parse(JSON.stringify(DEFAULT_LOOKS[k]))});
-    S.brushLog=S.brushLog||[];S.spongeLog=S.spongeLog||[];S.v=3;save()}}
+    S.brushLog=S.brushLog||[];S.spongeLog=S.spongeLog||[];S.v=3;save()}
+  if(S.v<4){if(!S.steps.mk0)S.steps.mk0=JSON.parse(JSON.stringify(DEFAULT_LOOKS.mk0));S.v=4;save()}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Could not save. Phone storage may be full. Try smaller photos or Backup.')}}
 
 /* helpers */
@@ -608,7 +623,7 @@ function stepsFor(period,date){
   const dw=(date||new Date()).getDay();
   return (S.steps[period]||[]).filter(s=>s.when==='all'||(Array.isArray(s.when)&&(period==='pm'?s.when.includes(n):s.when.includes(dw))));
 }
-function dayLog(k){if(!S.log[k])S.log[k]={am:{},pm:{},body:{}};const L=S.log[k];['am','pm','body','mk1','mk2','mk3'].forEach(x=>{if(!L[x])L[x]={}});return L}
+function dayLog(k){if(!S.log[k])S.log[k]={am:{},pm:{},body:{}};const L=S.log[k];['am','pm','body','mk0','mk1','mk2','mk3'].forEach(x=>{if(!L[x])L[x]={}});return L}
 function periodDone(k,period){const d=new Date(k+'T12:00:00');const st=stepsFor(period,d);const l=(S.log[k]||{})[period]||{};return st.length>0&&st.every(s=>l[s.id])}
 function useBy(p){if(!p.opened||!p.pao)return null;const d=new Date(p.opened+'T12:00:00');d.setMonth(d.getMonth()+Number(p.pao));return d}
 function useByChip(p){const d=useBy(p);if(!d)return '';const days=Math.round((d-new Date())/864e5);
@@ -619,11 +634,11 @@ let period=(new Date().getHours()<15)?'am':'pm', editPeriod='am', shelfFilter='A
 function go(v){document.querySelectorAll('section.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));window.scrollTo(0,0);render(v)}
 function render(v){({today:renderToday,week:renderWeek,shelf:renderShelf,makeup:renderMakeup,diary:renderDiary,guide:renderGuide})[v]()}
-let curLook='mk1',mkSub='Steps',bagFilter='All';
+let curLook='mk0',mkSub='Steps',bagFilter='All';
 function daysSince(arr){const last=(arr||[])[arr.length-1];if(!last)return null;return Math.floor((new Date(dkey())-new Date(last))/864e5)}
 function renderMakeup(){
   document.querySelectorAll('#segLook button').forEach(b=>b.classList.toggle('on',b.dataset.look===curLook));
-  $('#mkSub').innerHTML=['Steps','My makeup bag','Brushes','Tips'].map(x=>`<button data-mksub="${x}" class="${x===mkSub?'on':''}">${x}</button>`).join('');
+  $('#mkSub').innerHTML=['Steps','Face maps','My makeup bag','Brushes','Tips'].map(x=>`<button data-mksub="${x}" class="${x===mkSub?'on':''}">${x}</button>`).join('');
   const L=LOOKS[curLook],k=dkey();let h='';
   if(mkSub==='Steps'){
     const steps=S.steps[curLook]||[],l=dayLog(k)[curLook],done=steps.filter(s=>l[s.id]).length;
@@ -636,6 +651,17 @@ function renderMakeup(){
       <button class="mini" data-mmv="${i}" data-d="-1" aria-label="Move up">↑</button><button class="mini" data-mmv="${i}" data-d="1" aria-label="Move down">↓</button><button class="mini" data-mes="${s.id}" aria-label="Edit">✏️</button></div>`}).join('')}
       <button class="btn ghost full" id="mkAddStep">+ Add a step</button></div>
       <button class="btn ghost full" id="mkPrint">🖨️ Print my 3 looks</button>`;
+  }
+  if(mkSub==='Face maps'){
+    h+=`<div class="card"><h3 style="font-size:18px">Where to put what</h3><p class="small muted" style="margin:4px 0 0">Light makeup for a young, lifted, healthy and bright face. The one rule: <b>up and out</b>. The arrows show which way to blend.</p></div>`;
+    h+=['lift','base','conceal','blush','bronze','powder','eyes','brows','lips'].map(k=>mapCard(k)).join('');
+    h+=`<div class="card guide"><h3>The 2026 way for a lifted, fresh face</h3><ul>
+      <li><b>Edit, do not add.</b> Fewer products, placed well.</li>
+      <li><b>Creams over powders</b> for blush and base: they melt in and look like skin.</li>
+      <li><b>Glow, not grease:</b> light on the high points, powder only where you shine.</li>
+      <li><b>Lift everything:</b> blush, bronzer, shadow and liner all angle up toward the temples.</li>
+      <li><b>Blurred lips:</b> soft colour pressed in, no hard edges.</li></ul>
+      <p class="small muted" style="margin:6px 0 0">These are makeup-artist and beauty-editor trends for 2026 and for mature skin, not rules. Use what makes you feel good.</p></div>`;
   }
   if(mkSub==='My makeup bag'){
     const fl=['All',...MCATS,'Running low'];
@@ -692,10 +718,105 @@ function renderMakeup(){
       <li><a href="https://eucerin.at/produkte/sonnenschutz/photoaging-control-face-sun-cc-creme-tinted-mittel-spf-50-plus" target="_blank" rel="noopener">Eucerin: Photoaging Control Tinted SPF 50+ (makeup base, eye area)</a></li>
       <li><a href="https://elfcosmetics.co.uk/products/power-grip-primer" target="_blank" rel="noopener">e.l.f.: Power Grip Primer</a></li>
       <li>Brush jobs: from your Real Techniques card. Other product details: from your packs.</li>
-      <li>The "soft, fresh makeup tips" are general makeup-artist advice, not rules.</li></ul></div>`;
+      <li><a href="https://www.whowhatwear.com/uk/beauty/makeup/summer-makeup-trends-2026" target="_blank" rel="noopener">Who What Wear: 2026 trends (blush placed higher, toward the temples)</a></li>
+      <li><a href="https://sixtyandme.com/bold-makeup-colours-not-overdone/" target="_blank" rel="noopener">Sixty and Me: 2026 makeup for women over 50</a></li>
+      <li><a href="https://www.adorebeauty.com.au/beautyiq/make-up/makeup-for-mature-skin-blush-tutorial/" target="_blank" rel="noopener">Amanda Ramsay (mature-skin makeup artist): blush, highlight, contour</a></li>
+      <li>The "soft, fresh makeup tips" and face maps are general makeup-artist advice, not rules.</li></ul></div>`;
   }
   $('#mkBody').innerHTML=h;
 }
+/* ---------- FACE MAPS (original line drawings) ---------- */
+const MC={conceal:'#F3D27A',blush:'#E8798A',bronze:'#B9824F',powder:'#9C93D6',lid:'#EFD3AE',crease:'#B98A65',outer:'#6E4B3A',liner:'#3B2A22',shimmer:'#D9AE3C',brow:'#7A5A45',lip:'#C4505E',base:'#E9C4A6'};
+const ARROW='<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5F7F68"/></marker></defs>';
+function mapFor(s){if(!String(s.id||'').startsWith('k'))return '';const l=(s.label||'').toLowerCase();
+  if(/lip/.test(l))return 'lips';if(/conceal|spot/.test(l))return 'conceal';if(/blush/.test(l))return 'blush';if(/bronz/.test(l))return 'bronze';
+  if(/spray/.test(l))return '';if(/^set|powder/.test(l))return 'powder';if(/brow/.test(l))return 'brows';if(/eye|liner|shimmer|crease|lid|corner|lash/.test(l))return 'eyes';
+  if(/foundation|primer|sunscreen/.test(l))return 'base';return ''}
+function faceSVG(sideOverlay,centreOverlay,extra){
+  const side=sideOverlay||'',mir=side?`<g transform="translate(300,0) scale(-1,1)">${side}</g>`:'';
+  return `<svg viewBox="0 0 300 380" xmlns="http://www.w3.org/2000/svg" role="img">${ARROW}
+  <path d="M150 40C220 40 250 100 248 170C246 240 215 300 150 330C85 300 54 240 52 170C50 100 80 40 150 40Z" fill="#FBE9DC" stroke="#C9A992" stroke-width="2"/>
+  <path d="M60 150C55 70 100 22 150 22C200 22 245 70 240 150C226 96 192 66 150 64C108 66 74 96 60 150Z" fill="#D8C8BC"/>
+  <ellipse cx="50" cy="188" rx="10" ry="24" fill="#FBE9DC" stroke="#C9A992" stroke-width="2"/><ellipse cx="250" cy="188" rx="10" ry="24" fill="#FBE9DC" stroke="#C9A992" stroke-width="2"/>
+  <path d="M120 316V378M180 316V378" stroke="#C9A992" stroke-width="2"/>
+  ${side}${mir}${centreOverlay||''}
+  <path d="M88 142Q110 128 135 136M212 142Q190 128 165 136" stroke="#8A6B57" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M92 166Q113 152 134 166Q113 176 92 166ZM208 166Q187 152 166 166Q187 176 208 166Z" fill="#fff" stroke="#6E5A4E" stroke-width="2"/>
+  <circle cx="113" cy="165" r="6" fill="#6E5A4E"/><circle cx="187" cy="165" r="6" fill="#6E5A4E"/>
+  <path d="M150 168L145 214Q150 221 157 214" stroke="#C9A992" stroke-width="2" fill="none"/>
+  <path d="M122 256Q136 246 150 252Q164 246 178 256Q150 262 122 256Z" fill="#E7A39C" stroke="#B9706B" stroke-width="1.5"/>
+  <path d="M122 256Q150 279 178 256Q150 263 122 256Z" fill="#EDB3AC" stroke="#B9706B" stroke-width="1.5"/>
+  ${extra||''}</svg>`}
+function eyeSVG(o){return `<svg viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg" role="img">${ARROW}
+  <rect width="300" height="170" fill="#FBE9DC"/>${o||''}
+  <path d="M50 52Q140 12 255 44" stroke="#8A6B57" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <path d="M70 112Q150 62 232 106Q150 142 70 112Z" fill="#fff" stroke="#6E5A4E" stroke-width="2.5"/>
+  <circle cx="150" cy="104" r="20" fill="#7B6A5E"/><circle cx="150" cy="104" r="8" fill="#2E2622"/></svg>`}
+const MAPS={
+ lift:{t:'The lift map (everything together)',why:'Everything goes UP and OUT. Keep colour above the dotted line (from the side of your nose to the top of your ear). Colour placed low pulls the face down.',
+  svg:()=>faceSVG(`<ellipse cx="80" cy="198" rx="33" ry="14" transform="rotate(-28 80 198)" fill="${MC.blush}" opacity=".55"/>
+   <path d="M86 84Q62 112 62 150" stroke="${MC.bronze}" stroke-width="14" opacity=".45" fill="none" stroke-linecap="round"/>
+   <path d="M70 258Q100 300 132 316" stroke="${MC.bronze}" stroke-width="12" opacity=".35" fill="none" stroke-linecap="round"/>
+   <path d="M104 178Q120 176 136 172L128 194Z" fill="${MC.conceal}" opacity=".85"/>
+   <path d="M142 214L58 176" stroke="#5F7F68" stroke-width="1.5" stroke-dasharray="4 4"/>
+   <path d="M100 196L70 150" stroke="#5F7F68" stroke-width="2" marker-end="url(#ah)" fill="none"/>`,
+   `<ellipse cx="150" cy="104" rx="26" ry="13" fill="${MC.powder}" opacity=".35"/><rect x="143" y="168" width="14" height="44" rx="7" fill="${MC.powder}" opacity=".35"/>`),
+  legend:[['blush','Blush'],['bronze','Bronzer'],['conceal','Concealer'],['powder','Powder (only if shiny)']],
+  how:['Concealer: inner corner under the eyes, tapped up and out.','Blush: high on the cheekbone, blended toward the temple.','Bronzer: a light touch on the temples and under the jaw only.','Powder: only where you shine.']},
+ base:{t:'Tinted SPF and foundation',why:'Most coverage in the centre where redness and dark spots are, thinning out to nothing at the edges. Edges stay sheer so it looks like skin.',
+  svg:()=>faceSVG('',`<ellipse cx="150" cy="190" rx="70" ry="85" fill="${MC.base}" opacity=".55"/><ellipse cx="150" cy="190" rx="98" ry="118" fill="${MC.base}" opacity=".25"/>
+   ${['M118 196L78 196','M182 196L222 196','M150 118L150 82','M150 268L150 300'].map(d=>`<path d="${d}" stroke="#5F7F68" stroke-width="2" marker-end="url(#ah)"/>`).join('')}`),
+  legend:[['base','Most product here, blend out to sheer']],how:['Tinted SPF: whole face and neck, at least 1 teaspoon (5 ml / 0.17 fl oz).','Foundation (Soft glam / Evening only): a small dab in the centre, bounce outward with the damp sponge.','Skip foundation on Minimal days, the tinted SPF is enough.']},
+ conceal:{t:'Concealer: only where it is needed',why:'Brighten only the shadows. A small triangle at the inner corner and a lift at the outer corner open up the eyes. No thick band under the whole eye, it settles into lines.',
+  svg:()=>faceSVG(`<path d="M104 178Q120 176 136 172L128 196Z" fill="${MC.conceal}" opacity=".9"/>
+   <circle cx="90" cy="176" r="4.5" fill="${MC.conceal}"/><path d="M86 172L74 158" stroke="#5F7F68" stroke-width="2" marker-end="url(#ah)"/>
+   <circle cx="141" cy="206" r="5" fill="${MC.conceal}"/><circle cx="124" cy="266" r="4" fill="${MC.conceal}"/>
+   <path d="M120 186L104 166" stroke="#5F7F68" stroke-width="2" marker-end="url(#ah)"/>`),
+  legend:[['conceal','Concealer']],how:['Inner corner under the eye: small triangle, tap upward.','Outer corner of the eye: one tiny dot, blended up toward the temple for lift.','Beside the nose and on any dark spot or redness.','Optional: a tiny dot under each mouth corner to lift it.','Product: Maybelline Eraser 115. Tool: RT 210 or a fingertip.']},
+ blush:{t:'Blush: high and lifted',why:'Just above the round of the cheek, swept up toward the temple. This is the biggest 2026 trend for women over 50 because it lifts the whole face.',
+  svg:()=>faceSVG(`<ellipse cx="80" cy="198" rx="33" ry="14" transform="rotate(-28 80 198)" fill="${MC.blush}" opacity=".6"/>
+   <path d="M100 198L68 150" stroke="#5F7F68" stroke-width="2.5" marker-end="url(#ah)" fill="none"/>`),
+  legend:[['blush','Cream blush']],how:['Smile, find the round of your cheek, then go a little higher and further out.','Dab 2 dots, blend up toward the temple, not toward the nose.','Cream blush (your Revolution stick) melts in and looks like a healthy flush.','Tap what is left on the brush onto your lips so they match.'],dd:true},
+ bronze:{t:'Bronzer: high and light',why:'For a healthy, warm glow, not heavy contour. A light touch on the temples and hairline, a whisper on the top of the cheekbone and under the jawline.',
+  svg:()=>faceSVG(`<path d="M86 84Q62 112 62 150" stroke="${MC.bronze}" stroke-width="16" opacity=".45" fill="none" stroke-linecap="round"/>
+   <path d="M60 176Q74 170 92 166" stroke="${MC.bronze}" stroke-width="10" opacity=".35" fill="none" stroke-linecap="round"/>
+   <path d="M70 258Q100 300 132 316" stroke="${MC.bronze}" stroke-width="12" opacity=".35" fill="none" stroke-linecap="round"/>`),
+  legend:[['bronze','Bronzer']],how:['Temples and along the hairline: like the top of a "3".','Just above where blush goes, on the outer cheekbone.','Under the jawline, blended down onto the neck, to define the jaw.','Product: Makeup Revolution bronzer. Tool: RT 206 mini contour. Tap off the extra first.']},
+ powder:{t:'Powder: only where you shine',why:'Powder on dry areas and fine lines makes skin look older. Keep it to the shiny spots and use very little.',
+  svg:()=>faceSVG(`<path d="M106 178Q120 176 134 172L128 190Z" fill="${MC.powder}" opacity=".45"/>`,
+   `<ellipse cx="150" cy="104" rx="28" ry="14" fill="${MC.powder}" opacity=".45"/><rect x="143" y="168" width="14" height="46" rx="7" fill="${MC.powder}" opacity=".45"/>
+    <ellipse cx="150" cy="296" rx="16" ry="9" fill="${MC.powder}" opacity=".45"/>`),
+  legend:[['powder','A little powder']],how:['Centre of the forehead, down the nose, the chin.','A tiny bit on the concealer under the eyes so it does not crease.','Never on the outer cheeks or around the mouth lines.','Product: essence fix & last. Tool: RT 407, tap and press.']},
+ eyes:{t:'Eyes: lift the outer corner',why:'Darker colour and liner go up toward the end of the brow, never down. Light on the lid opens the eye. Shimmer only in the centre.',
+  svg:()=>eyeSVG(`<path d="M70 112Q150 62 232 106L240 88Q150 34 64 96Z" fill="${MC.lid}"/>
+   <path d="M64 92Q150 30 244 84" stroke="${MC.crease}" stroke-width="16" opacity=".55" fill="none" stroke-linecap="round"/>
+   <path d="M206 72Q236 74 256 72L234 108Q222 92 206 72Z" fill="${MC.outer}" opacity=".7"/>
+   <circle cx="150" cy="76" r="9" fill="${MC.shimmer}" opacity=".85"/>
+   <path d="M92 104Q160 70 232 104L248 90" stroke="${MC.liner}" stroke-width="5" fill="none" stroke-linecap="round"/>
+   <path d="M232 76L262 52" stroke="#5F7F68" stroke-width="2.5" marker-end="url(#ah)"/>`),
+  legend:[['lid','1. Light, all over the lid'],['crease','2. Medium brown, crease'],['outer','3. Deep, outer corner'],['shimmer','4. Shimmer, centre only'],['liner','5. Liner, lifts at the end']],
+  how:['Optional: a tiny bit of concealer on the lid first so shadow lasts and the lid looks brighter.','Light matte (RT 301), then crease (RT 308) with small side-to-side moves.','Outer corner shadow angled UP toward the brow tail (RT 307).','Liner close to the upper lashes, thicker at the outer end, flicking slightly up. Keep the lower lash line soft or bare.']},
+ brows:{t:'Brows: the face-lifter',why:'Brushed-up brows with a tail that does not drop lower than the start make you look more awake.',
+  svg:()=>faceSVG(`<path d="M142 214L136 128" stroke="#5F7F68" stroke-width="1.5" stroke-dasharray="4 4"/>
+   <path d="M142 214L104 120" stroke="#5F7F68" stroke-width="1.5" stroke-dasharray="4 4"/>
+   <path d="M142 214L80 134" stroke="#5F7F68" stroke-width="1.5" stroke-dasharray="4 4"/>
+   <path d="M88 142Q110 128 135 136" stroke="${MC.brow}" stroke-width="9" fill="none" stroke-linecap="round" opacity=".55"/>
+   <path d="M118 128L114 112" stroke="#5F7F68" stroke-width="2" marker-end="url(#ah)"/><path d="M100 132L94 118" stroke="#5F7F68" stroke-width="2" marker-end="url(#ah)"/>`,
+   [['128','118','1'],['98','110','2'],['68','130','3']].map(([x,y,n])=>`<text x="${x}" y="${y}" font-size="12" font-weight="bold" fill="#5F7F68" font-family="sans-serif">${n}</text><text x="${300-x-7}" y="${y}" font-size="12" font-weight="bold" fill="#5F7F68" font-family="sans-serif">${n}</text>`).join('')),
+  legend:[['brow','Brow']],how:['1 Start: straight up from the side of your nose.','2 Highest point: on the line from your nose through the outside of your iris.','3 End: on the line from your nose past the outer corner of your eye. Keep the tail level with or higher than the start.','Brush hairs up and out with the clear gel (or the spoolie first).']},
+ lips:{t:'Lips: soft, blurred and lifted',why:'A soft "blurred" lip is big in 2026. Colour strongest in the centre, softer at the edges. Corners stay clean so the mouth looks lifted.',
+  svg:()=>faceSVG(``,`<path d="M122 256Q136 246 150 252Q164 246 178 256Q150 279 122 256Z" fill="none" stroke="${MC.lip}" stroke-width="3"/>
+   <ellipse cx="150" cy="259" rx="14" ry="7" fill="${MC.lip}" opacity=".55"/>
+   <path d="M150 248L150 240" stroke="#5F7F68" stroke-width="2" marker-end="url(#ah)"/>
+   <circle cx="121" cy="262" r="3.5" fill="${MC.conceal}"/><circle cx="179" cy="262" r="3.5" fill="${MC.conceal}"/>`),
+  legend:[['lip','Liner and colour'],['conceal','Tiny concealer dot']],how:['Liner on your natural edge. A tiny bit over at the centre of the top lip for a fuller look.','Colour in the centre, then press your lips together to blur it outward.','Keep the corners neat. A dot of concealer under each corner lifts the mouth.','Products: lip liner + MOODmatcher, BT lipstick, blush stick or the lip stain.']}
+};
+function mapCard(k,withBtn){const m=MAPS[k];if(!m)return '';
+  const dd=m.dd?`<div class="dodont"><div style="color:var(--sage)">✓ Yes: high and lifted${faceSVG(`<ellipse cx="80" cy="198" rx="33" ry="14" transform="rotate(-28 80 198)" fill="${MC.blush}" opacity=".6"/>`)}</div><div style="color:var(--red)">✗ No: low on the apples${faceSVG(`<circle cx="108" cy="222" r="20" fill="${MC.blush}" opacity=".6"/>`)}</div></div>`:'';
+  return `<div class="card map"><h3 style="font-size:18px">${m.t}</h3>${m.svg()}<div class="legend2">${m.legend.map(x=>`<span><i style="background:${MC[x[0]]}"></i>${x[1]}</span>`).join('')}</div>
+  <p class="small" style="margin:6px 0"><b>Why:</b> ${m.why}</p>${dd}<ul class="small" style="margin:6px 0 0;padding-left:18px">${m.how.map(x=>`<li>${x}</li>`).join('')}</ul></div>`}
+function showMap(k){openSheet(mapCard(k).replace('<div class="card map">','<div class="map">'))}
+
 let printMode='week';
 function buildPrintLooks(){
   $('#printSheet').innerHTML=`<h1>Glow Ritual - my makeup looks</h1><p class="sub">Product · brush · how</p><table><tr>${Object.keys(LOOKS).map(k=>`<th>${LOOKS[k].ic} ${LOOKS[k].name} (${LOOKS[k].time})</th>`).join('')}</tr><tr>${Object.keys(LOOKS).map(k=>`<td><ol>${(S.steps[k]||[]).map(s=>{const p=prod(s.pid);return `<li><span class="box"></span><b>${esc(s.label)}</b>${p?': '+esc(p.brand+' '+p.name.split('(')[0].trim()):''}${s.brush?' <i>· '+esc(s.brush)+'</i>':''}</li>`}).join('')}</ol></td>`).join('')}</tr></table>
@@ -746,7 +867,7 @@ function stepHTML(s,i,l){const p=s.pid?prod(s.pid):null;const mk=p&&p.kind==='ma
       <div class="sname">${esc(s.label)}</div>
       ${s.pid?(p?`<button class="sprod" data-prod="${p.id}">${esc(p.brand)} ${esc(p.name)} ›</button>`:'<span class="chip red">No product chosen</span>'):''}
       <div class="stip">${esc(s.tip)}</div>
-      <div class="chips">${s.brush?`<span class="chip brushchip">🖌️ ${esc(s.brush)}</span>`:''}${p&&p.amount?`<span class="chip sage">${esc(p.amount)}</span>`:''}${p&&p.low?'<span class="chip gold">Running low</span>':''}${p?useByChip(p):''}</div>
+      <div class="chips">${s.brush?`<span class="chip brushchip">🖌️ ${esc(s.brush)}</span>`:''}${mapFor(s)?`<button class="wherebtn" data-map="${mapFor(s)}">📍 Where?</button>`:''}${p&&p.amount?`<span class="chip sage">${esc(p.amount)}</span>`:''}${p&&p.low?'<span class="chip gold">Running low</span>':''}${p?useByChip(p):''}</div>
     </div></div>`}
 
 function renderWeek(){
@@ -992,6 +1113,7 @@ document.addEventListener('click',e=>{
     w=w.includes(i)?w.filter(x=>x!==i):[...w,i].sort();an.when=w;if(ga)ga.when=[0,1,2,3,4,5,6].filter(x=>!w.includes(x));save();refresh();toast(DAYS_L[i]+(w.includes(i)?': NIVEA morning':': Garnier morning'));return}
   if(d.theme){S.theme=d.theme;save();applyTheme();return}
   if(d.look){curLook=d.look;renderMakeup();return}
+  if(d.map){showMap(d.map);return}
   if(d.mksub){mkSub=d.mksub;renderMakeup();return}
   if(d.bf){bagFilter=d.bf;renderMakeup();return}
   if(d.mmv!==undefined){const i=+d.mmv,j=i+(+d.d),L=S.steps[curLook];if(j<0||j>=L.length)return;[L[i],L[j]]=[L[j],L[i]];save();renderMakeup();return}
