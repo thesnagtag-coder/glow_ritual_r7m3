@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Glow Ritual - My Skincare</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{
   --bg:#FBF8F4;--card:#FFFFFF;--soft:#F4EEE8;--line:#E8DFD6;--ink:#2E2A28;--mute:#7A716B;
@@ -1146,7 +1149,7 @@ function settings(){
   <div class="dsec"><h3>Look</h3><div class="btnrow"><button class="btn ghost" data-theme="light">☀️ Light</button><button class="btn ghost" data-theme="dark">🌙 Dark</button></div></div>
   <div class="dsec"><h3>Backup</h3><p class="small muted">Everything saves on this phone automatically. Make a backup file before clearing your browser or changing phone.</p>
   <div class="btnrow"><button class="btn" id="expBtn">⬇️ Download backup</button><button class="btn ghost" id="impBtn">⬆️ Restore backup</button></div></div>
-  <div class="dsec"><h3>Add to home screen</h3><p class="small muted">Open this file in Chrome, tap ⋮ then "Add to Home screen" so it opens like an app.</p></div>
+  <div class="dsec"><h3>Add to home screen</h3><p class="small muted">Open it in Chrome, tap ⋮ then "Install app" (or "Add to Home screen") so it opens like an app.</p></div>
   <div class="dsec"><h3>Start over</h3><p class="small muted">Puts back your original products, routine and photos. Deletes your ticks and diary.</p><div class="btnrow"><button class="btn red" id="resetBtn">Reset everything</button></div></div>`);
   $('#expBtn').onclick=()=>{const b=new Blob([JSON.stringify(S)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='glow-ritual-backup-'+dkey()+'.json';document.body.appendChild(a);a.click();a.remove();toast('Backup downloaded')};
   $('#impBtn').onclick=()=>{$('#importIn').value='';$('#importIn').click()};
@@ -1237,6 +1240,7 @@ $('#saveDiary').onclick=()=>{const tags=[...document.querySelectorAll('#feelBtns
   if(!tags.length&&!note){toast('Pick a feeling or write a note');return}S.diary[dkey()]={tags,note};save();renderDiary();toast('Saved')};
 
 load();applyTheme();renderToday();
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 </script>
 </body>
 </html>
