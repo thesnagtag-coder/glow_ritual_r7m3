@@ -593,7 +593,7 @@ const DEFAULT_STEPS={
 };
 const DEFAULT_NIGHTS={0:'retinol',1:'copper',2:'azelaic',3:'retinol',4:'azelaic',5:'retinol',6:'copper'};
 
-function fresh(){return {v:6,shop:{},out:{},theme:'light',starter:false,nights:{...DEFAULT_NIGHTS},products:JSON.parse(JSON.stringify([...DEFAULT_PRODUCTS,...DEFAULT_MAKEUP])).map(p=>({...p,look:LOOK_NEW[p.id]||p.look,opened:'',low:false,notes:'',history:[]})),steps:{...JSON.parse(JSON.stringify(DEFAULT_STEPS)),...JSON.parse(JSON.stringify(DEFAULT_LOOKS))},log:{},diary:{},maskLog:[],patchLog:[],brushLog:[],spongeLog:[]}}
+function fresh(){return {v:7,shop:{},out:{},theme:'light',starter:false,nights:{...DEFAULT_NIGHTS},products:JSON.parse(JSON.stringify([...DEFAULT_PRODUCTS,...DEFAULT_MAKEUP])).map(p=>({...p,look:LOOK_NEW[p.id]||p.look,opened:'',low:false,notes:'',history:[]})),steps:{...JSON.parse(JSON.stringify(DEFAULT_STEPS)),...JSON.parse(JSON.stringify(DEFAULT_LOOKS))},log:{},diary:{},maskLog:[],patchLog:[],brushLog:[],spongeLog:[]}}
 let S;
 function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):fresh()}catch(e){S=fresh()}
   if(!S.steps.body)S.steps.body=JSON.parse(JSON.stringify(DEFAULT_STEPS.body));
@@ -615,7 +615,8 @@ function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):fresh()}
       if(s.id==='a5'){s.sun=true;s.label='Protect (going out)';s.tip='Only on days you go outside. At least 1 teaspoon (5 ml / 0.17 fl oz). Face, neck, ears. Reapply about every 2 hours outdoors.'}
       if(['k0b','k1b','k2c'].includes(s.id)){const d=DEFAULT_LOOKS[s.id.slice(1,2)==='0'?'mk0':s.id.slice(1,2)==='1'?'mk1':'mk2'].find(x=>x.id===s.id);if(d){s.label=d.label;s.tip=d.tip}}}));
     S.v=5;save()}
-  if(S.v<6){const NB={"k2g": "Brush 406 (pink handle, wide and angled)", "k3h": "Brush 406 (pink handle, wide and angled)", "k2i": "C2 (beige, medium and fluffy)", "k3j": "C2 (beige, medium and fluffy)", "k2j": "C1 (beige, small and fluffy, round tip)", "k3k": "C1 (beige, small and fluffy, round tip)", "k3l": "C10 (beige, small and angled)", "k3m": "C6 (beige, small and dense), or the silicone applicator", "k2k": "C9 (beige, small and pointed) to smudge", "k3n": "C9 (beige, small and pointed) to smudge, or C5 (beige, flat and angled) for a sharp line"};Object.keys(LOOKS).forEach(k=>(S.steps[k]||[]).forEach(s=>{if(NB[s.id]&&/Brush (20[6]|30[178]|33[2]|313)/.test(s.brush||''))s.brush=NB[s.id];if(s.id==='k3n'&&/definer/.test(s.tip||''))s.tip='Line close to the upper lashes. Smudge it with C9, or sharpen the line with C5.'}));S.v=6;save()}}
+  if(S.v<6){const NB={"k2g": "Brush 406 (pink handle, wide and angled)", "k3h": "Brush 406 (pink handle, wide and angled)", "k2i": "C2 (beige, medium and fluffy)", "k3j": "C2 (beige, medium and fluffy)", "k2j": "C1 (beige, small and fluffy, round tip)", "k3k": "C1 (beige, small and fluffy, round tip)", "k3l": "C10 (beige, small and angled)", "k3m": "C6 (beige, small and dense), or the silicone applicator", "k2k": "C9 (beige, small and pointed) to smudge", "k3n": "C9 (beige, small and pointed) to smudge, or C5 (beige, flat and angled) for a sharp line"};Object.keys(LOOKS).forEach(k=>(S.steps[k]||[]).forEach(s=>{if(NB[s.id]&&/Brush (20[6]|30[178]|33[2]|313)/.test(s.brush||''))s.brush=NB[s.id];if(s.id==='k3n'&&/definer/.test(s.tip||''))s.tip='Line close to the upper lashes. Smudge it with C9, or sharpen the line with C5.'}));S.v=6;save()}
+  if(S.v<7){const n=new Date();for(let i=0;i<7;i++){const d=addDays(n,-i),dk=dkey(d),wk='d'+d.getDay();if(S.log[dk]&&!S.log[wk])S.log[wk]=JSON.parse(JSON.stringify(S.log[dk]))}S.v=7;save()}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Could not save. Phone storage may be full. Try smaller photos or Backup.')}}
 
 /* helpers */
@@ -639,7 +640,9 @@ function stepsFor(period,date,forPrint){
   return (S.steps[period]||[]).filter(s=>!s.sun||forPrint||goingOut(date)).filter(s=>s.when==='all'||(Array.isArray(s.when)&&(period==='pm'?s.when.includes(n):s.when.includes(dw))));
 }
 function dayLog(k){if(!S.log[k])S.log[k]={am:{},pm:{},body:{}};const L=S.log[k];['am','pm','body','mk0','mk1','mk2','mk3'].forEach(x=>{if(!L[x])L[x]={}});return L}
-function periodDone(k,period){const d=new Date(k+'T12:00:00');const st=stepsFor(period,d);const l=(S.log[k]||{})[period]||{};return st.length>0&&st.every(s=>l[s.id])}
+function wkey(d){return 'd'+(d||new Date()).getDay()}
+function dateForDay(i){const n=new Date();return addDays(n,i-n.getDay())}
+function periodDone(i,period){const d=dateForDay(i);const st=stepsFor(period,d);const l=(S.log['d'+i]||{})[period]||{};return st.length>0&&st.every(s=>l[s.id])}
 function useBy(p){if(!p.opened||!p.pao)return null;const d=new Date(p.opened+'T12:00:00');d.setMonth(d.getMonth()+Number(p.pao));return d}
 function useByChip(p){const d=useBy(p);if(!d)return '';const days=Math.round((d-new Date())/864e5);
   if(days<0)return '<span class="chip red">Past use-by</span>';if(days<=30)return `<span class="chip gold">Use within ${days} days</span>`;return ''}
@@ -701,7 +704,7 @@ function showBrush(ids){openSheet(`<h2>Which brush?</h2>`+ids.split(',').map(bru
 function renderMakeup(){
   document.querySelectorAll('#segLook button').forEach(b=>b.classList.toggle('on',b.dataset.look===curLook));
   $('#mkSub').innerHTML=['Steps','Face maps','My makeup bag','Brushes','Tips'].map(x=>`<button data-mksub="${x}" class="${x===mkSub?'on':''}">${x}</button>`).join('');
-  const L=LOOKS[curLook],k=dkey();let h='';
+  const L=LOOKS[curLook],k=wkey();let h='';
   if(mkSub==='Steps'){
     const steps=S.steps[curLook]||[],l=dayLog(k)[curLook],done=steps.filter(s=>l[s.id]).length;
     h+=`<div class="card"><div class="row sp"><b>${L.ic} ${L.name}</b><span class="chip">${L.time}</span></div><p class="small muted" style="margin:4px 0 0">${L.what}</p>
@@ -901,13 +904,13 @@ function renderToday(){
   const n=NIGHTS[nightFor(now)];
   $('#tonight').innerHTML=`Tonight: <span class="badge ${n.cls}">${n.ic} ${n.name}</span>`;
   // 7 days
-  let w='';for(let i=6;i>=0;i--){const d=addDays(now,-i),dk=dkey(d);
-    w+=`<div class="d7 ${i===0?'today':''}">${DAYS[d.getDay()]}<div class="dot"><span class="a ${periodDone(dk,'am')?'on':''}"></span><span class="p ${periodDone(dk,'pm')?'on':''}"></span></div></div>`}
+  let w='';for(let i=0;i<7;i++){
+    w+=`<div class="d7 ${i===now.getDay()?'today':''}">${DAYS[i]}<div class="dot"><span class="a ${periodDone(i,'am')?'on':''}"></span><span class="p ${periodDone(i,'pm')?'on':''}"></span></div></div>`}
   $('#week7').innerHTML=w;
-  let st=0;for(let i=0;i<400;i++){const dk=dkey(addDays(now,-i));const both=periodDone(dk,'am')&&periodDone(dk,'pm');if(both)st++;else if(i===0)continue;else break}
-  $('#streak').innerHTML=`<b>${st}</b> day${st===1?'':'s'} in a row with morning + evening done. Top half of each circle = morning, bottom = evening.`;
+  let st=0;for(let i=0;i<7;i++){if(periodDone(i,'am')&&periodDone(i,'pm'))st++}
+  $('#streak').innerHTML=`This week: <b>${st} of 7</b> days with morning + evening done. Top half of each circle = morning, bottom = evening.<div style="margin-top:8px"><button class="btn ghost sm" id="clearWeek">↺ Start a fresh week</button></div>`;
   document.querySelectorAll('#segAP button').forEach(b=>b.classList.toggle('on',b.dataset.p===period));
-  const steps=stepsFor(period,now),l=dayLog(k)[period];
+  const steps=stepsFor(period,now),l=dayLog(wkey(now))[period];
   const done=steps.filter(s=>l[s.id]).length;
   $('#progBar').style.width=(steps.length?done/steps.length*100:0)+'%';
   $('#progTxt').textContent=`${done} of ${steps.length} done`;
@@ -1181,7 +1184,7 @@ document.addEventListener('click',e=>{
   if(d.v){go(d.v);return}
   if(t.parentElement.id==='segAP'){period=d.p;renderToday();return}
   if(t.parentElement.id==='segEdit'){editPeriod=d.p;renderWeek();return}
-  if(d.tick){const inMk=!!t.closest('#v-makeup');const per=inMk?curLook:period;const l=dayLog(dkey())[per];l[d.tick]=!l[d.tick];save();inMk?renderMakeup():renderToday();return}
+  if(d.tick){const inMk=!!t.closest('#v-makeup');const per=inMk?curLook:period;const l=dayLog(wkey())[per];l[d.tick]=!l[d.tick];save();inMk?renderMakeup():renderToday();return}
   if(d.prod){showProduct(d.prod);return}
   if(d.edit){prodForm(prod(d.edit),false);return}
   if(d.buy){S.shop=S.shop||{};const cur=S.shop[d.buy];if(cur&&cur.type===d.type)delete S.shop[d.buy];else S.shop[d.buy]={type:d.type,date:dkey()};save();refresh();showProduct(d.buy);toast(S.shop[d.buy]?'Added to your shopping list':'Removed from your shopping list');return}
@@ -1205,8 +1208,9 @@ document.addEventListener('click',e=>{
   if(d.look){curLook=d.look;renderMakeup();return}
   if(d.map){showMap(d.map);return}
   if(d.brush){showBrush(d.brush);return}
-  if(t.id==='clearToday'){const L=dayLog(dkey());const had=Object.keys(L[period]).length;L[period]={};save();renderToday();toast(had?'All ticks cleared':'Nothing to clear');return}
-  if(t.id==='clearLook'){const L=dayLog(dkey());const had=Object.keys(L[curLook]).length;L[curLook]={};save();renderMakeup();toast(had?'All ticks cleared':'Nothing to clear');return}
+  if(t.id==='clearToday'){const L=dayLog(wkey());const had=Object.keys(L[period]).length;L[period]={};save();renderToday();toast(had?'All ticks cleared':'Nothing to clear');return}
+  if(t.id==='clearWeek'){confirmSheet('Clear all ticks for the whole week (Sunday to Saturday, skincare and makeup)? Your products, notes and diary stay.',()=>{for(let i=0;i<7;i++)delete S.log['d'+i];save();closeSheet();refresh();toast('Fresh week started')},'Clear the week');return}
+  if(t.id==='clearLook'){const L=dayLog(wkey());const had=Object.keys(L[curLook]).length;L[curLook]={};save();renderMakeup();toast(had?'All ticks cleared':'Nothing to clear');return}
   if(d.out!==undefined){S.out=S.out||{};const k=dkey();if(d.out==='1')S.out[k]=true;else delete S.out[k];save();renderToday();return}
   if(d.mksub){mkSub=d.mksub;renderMakeup();return}
   if(d.bf){bagFilter=d.bf;renderMakeup();return}
